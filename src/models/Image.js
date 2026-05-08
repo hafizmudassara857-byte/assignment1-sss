@@ -64,6 +64,7 @@
  *           description: Last update timestamp
  */
 const cosmosDB = require('../config/cosmos');
+const { generateImageUrl } = require('../config/azure-storage');
 const { v4: uuidv4 } = require('uuid');
 
 class Image {
@@ -82,6 +83,34 @@ class Image {
     this.createdAt = imageData.createdAt || new Date().toISOString();
     this.updatedAt = imageData.updatedAt || new Date().toISOString();
     this.type = 'image'; // For Cosmos DB type discrimination
+  }
+
+  getImageUrl() {
+    if (this.publicId) {
+      return generateImageUrl(this.publicId);
+    }
+
+    return this.url || null;
+  }
+
+  toJSON() {
+    return {
+      id: this.id,
+      title: this.title,
+      caption: this.caption,
+      location: this.location,
+      people: this.people,
+      url: this.url,
+      imageUrl: this.getImageUrl(),
+      publicId: this.publicId,
+      creatorId: this.creatorId,
+      averageRating: this.averageRating,
+      ratingCount: this.ratingCount,
+      commentCount: this.commentCount,
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt,
+      type: this.type
+    };
   }
 
   // Save image to Cosmos DB

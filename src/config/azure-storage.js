@@ -1,4 +1,9 @@
-const { BlobServiceClient } = require('@azure/storage-blob');
+const {
+  BlobServiceClient,
+  generateBlobSASQueryParameters,
+  BlobSASPermissions,
+  StorageSharedKeyCredential
+} = require('@azure/storage-blob');
 const env = require('./env');
 
 // Create BlobServiceClient using connection string directly
@@ -56,10 +61,31 @@ async function getImageProperties(blobName) {
   }
 }
 
+function generateImageUrl(publicId) {
+  const credential = new StorageSharedKeyCredential(
+    env.azureStorage.accountName,
+    env.azureStorage.accountKey
+  );
+
+  const sasToken = generateBlobSASQueryParameters(
+    {
+      containerName: env.azureStorage.containerName,
+      blobName: publicId,
+      permissions: BlobSASPermissions.parse('r'),
+      startsOn: new Date(),
+      expiresOn: new Date(Date.now() + 60 * 60 * 1000)
+    },
+    credential
+  ).toString();
+
+  return `https://${env.azureStorage.accountName}.blob.core.windows.net/${env.azureStorage.containerName}/${encodeURIComponent(publicId)}?${sasToken}`;
+}
+
 module.exports = {
   blobServiceClient,
   containerClient,
   uploadImage,
   deleteImage,
-  getImageProperties
+  getImageProperties,
+  generateImageUrl
 };
