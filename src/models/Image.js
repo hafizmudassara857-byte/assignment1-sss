@@ -132,8 +132,12 @@ class Image {
 
   // Static methods
   static async findById(imageId) {
-    const image = await cosmosDB.getItem('images', imageId, imageId);
-    return image ? new Image(image) : null;
+    const querySpec = {
+      query: 'SELECT * FROM c WHERE c.id = @id AND c.type = \'image\'',
+      parameters: [{ name: '@id', value: imageId }]
+    };
+    const images = await cosmosDB.queryItems('images', querySpec);
+    return images.length > 0 ? new Image(images[0]) : null;
   }
 
   static async findByCreatorId(creatorId, options = {}) {

@@ -26,8 +26,12 @@ class Rating {
   }
 
   static async findById(ratingId) {
-    const rating = await cosmosDB.getItem('ratings', ratingId, ratingId);
-    return rating ? new Rating(rating) : null;
+    const querySpec = {
+      query: 'SELECT * FROM c WHERE c.id = @id AND c.type = \'rating\'',
+      parameters: [{ name: '@id', value: ratingId }]
+    };
+    const ratings = await cosmosDB.queryItems('ratings', querySpec);
+    return ratings.length > 0 ? new Rating(ratings[0]) : null;
   }
 
   static async findByImageId(imageId, options = {}) {

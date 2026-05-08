@@ -27,8 +27,12 @@ class Comment {
   }
 
   static async findById(commentId) {
-    const comment = await cosmosDB.getItem('comments', commentId, commentId);
-    return comment ? new Comment(comment) : null;
+    const querySpec = {
+      query: 'SELECT * FROM c WHERE c.id = @id AND c.type = \'comment\'',
+      parameters: [{ name: '@id', value: commentId }]
+    };
+    const comments = await cosmosDB.queryItems('comments', querySpec);
+    return comments.length > 0 ? new Comment(comments[0]) : null;
   }
 
   static async findByImageId(imageId, options = {}) {

@@ -29,8 +29,12 @@ class Notification {
   }
 
   static async findById(notificationId) {
-    const notification = await cosmosDB.getItem('notifications', notificationId, notificationId);
-    return notification ? new Notification(notification) : null;
+    const querySpec = {
+      query: 'SELECT * FROM c WHERE c.id = @id AND c.type = \'notification\'',
+      parameters: [{ name: '@id', value: notificationId }]
+    };
+    const notifications = await cosmosDB.queryItems('notifications', querySpec);
+    return notifications.length > 0 ? new Notification(notifications[0]) : null;
   }
 
   static async findByRecipientId(recipientId, options = {}) {
