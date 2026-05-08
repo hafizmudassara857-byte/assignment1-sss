@@ -19,9 +19,9 @@ function getMimeType(buffer) {
         break;
       }
     }
-    if (match) return type;
+    if (match) {return type;}
   }
-  
+
   // Default to JPEG if no signature matches
   return 'image/jpeg';
 }

@@ -32,8 +32,8 @@ class Rating {
 
   static async findByImageId(imageId, options = {}) {
     let querySpec = {
-      query: "SELECT * FROM c WHERE c.imageId = @imageId AND c.type = 'rating' ORDER BY c.createdAt DESC",
-      parameters: [{ name: "@imageId", value: imageId }]
+      query: 'SELECT * FROM c WHERE c.imageId = @imageId AND c.type = \'rating\' ORDER BY c.createdAt DESC',
+      parameters: [{ name: '@imageId', value: imageId }]
     };
 
     if (options.limit) {
@@ -45,10 +45,10 @@ class Rating {
   }
 
   static async findByUserAndImage(userId, imageId) {
-    const rating = await cosmosDB.findItem('ratings', "c.userId = @userId AND c.imageId = @imageId AND c.type = 'rating'", {
+    const rating = await cosmosDB.findItem('ratings', 'c.userId = @userId AND c.imageId = @imageId AND c.type = \'rating\'', {
       parameters: [
-        { name: "@userId", value: userId },
-        { name: "@imageId", value: imageId }
+        { name: '@userId', value: userId },
+        { name: '@imageId', value: imageId }
       ]
     });
     return rating ? new Rating(rating) : null;
@@ -56,8 +56,8 @@ class Rating {
 
   static async findByUserId(userId, options = {}) {
     let querySpec = {
-      query: "SELECT * FROM c WHERE c.userId = @userId AND c.type = 'rating' ORDER BY c.createdAt DESC",
-      parameters: [{ name: "@userId", value: userId }]
+      query: 'SELECT * FROM c WHERE c.userId = @userId AND c.type = \'rating\' ORDER BY c.createdAt DESC',
+      parameters: [{ name: '@userId', value: userId }]
     };
 
     if (options.limit) {
@@ -78,8 +78,8 @@ class Rating {
   }
 
   static async aggregateStats(imageId) {
-    const query = `SELECT AVG(c.rating) as averageRating, COUNT(1) as ratingCount FROM c WHERE c.type = 'rating' AND c.imageId = @imageId`;
-    const parameters = [{ name: "@imageId", value: imageId }];
+    const query = 'SELECT AVG(c.rating) as averageRating, COUNT(1) as ratingCount FROM c WHERE c.type = \'rating\' AND c.imageId = @imageId';
+    const parameters = [{ name: '@imageId', value: imageId }];
     const results = await cosmosDB.queryItems('ratings', { query, parameters });
     return results[0] || { averageRating: 0, ratingCount: 0 };
   }
@@ -112,8 +112,8 @@ class Rating {
   // Calculate average rating for an image
   static async getAverageRating(imageId) {
     const querySpec = {
-      query: "SELECT AVG(c.rating) as averageRating, COUNT(c.id) as ratingCount FROM c WHERE c.imageId = @imageId AND c.type = 'rating'",
-      parameters: [{ name: "@imageId", value: imageId }]
+      query: 'SELECT AVG(c.rating) as averageRating, COUNT(c.id) as ratingCount FROM c WHERE c.imageId = @imageId AND c.type = \'rating\'',
+      parameters: [{ name: '@imageId', value: imageId }]
     };
 
     const results = await cosmosDB.queryItems('ratings', querySpec);

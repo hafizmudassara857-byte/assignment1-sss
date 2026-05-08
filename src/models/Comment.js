@@ -33,8 +33,8 @@ class Comment {
 
   static async findByImageId(imageId, options = {}) {
     let querySpec = {
-      query: "SELECT * FROM c WHERE c.imageId = @imageId AND c.type = 'comment' ORDER BY c.createdAt DESC",
-      parameters: [{ name: "@imageId", value: imageId }]
+      query: 'SELECT * FROM c WHERE c.imageId = @imageId AND c.type = \'comment\' ORDER BY c.createdAt DESC',
+      parameters: [{ name: '@imageId', value: imageId }]
     };
 
     if (options.limit) {
@@ -47,8 +47,8 @@ class Comment {
 
   static async findByUserId(userId, options = {}) {
     let querySpec = {
-      query: "SELECT * FROM c WHERE c.userId = @userId AND c.type = 'comment' ORDER BY c.createdAt DESC",
-      parameters: [{ name: "@userId", value: userId }]
+      query: 'SELECT * FROM c WHERE c.userId = @userId AND c.type = \'comment\' ORDER BY c.createdAt DESC',
+      parameters: [{ name: '@userId', value: userId }]
     };
 
     if (options.limit) {

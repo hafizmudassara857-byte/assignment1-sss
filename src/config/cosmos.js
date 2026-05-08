@@ -8,51 +8,49 @@ class CosmosDBService {
     this.containers = {};
   }
 
-async connect() {
-  try {
-    this.client = new CosmosClient({
-      endpoint: env.cosmosDb.endpoint,
-      key: env.cosmosDb.key
-    });
+  async connect() {
+    try {
+      this.client = new CosmosClient({
+        endpoint: env.cosmosDb.endpoint,
+        key: env.cosmosDb.key
+      });
 
-    const { database } = await this.client.databases.createIfNotExists({
-      id: env.cosmosDb.databaseId
-    });
+      const { database } = await this.client.databases.createIfNotExists({
+        id: env.cosmosDb.databaseId
+      });
 
-    this.database = database;
+      this.database = database;
 
-    await this.initializeContainers();
+      await this.initializeContainers();
 
-    console.log('✅ Connected to Azure Cosmos DB');
-    return true;
+      console.log('✅ Connected to Azure Cosmos DB');
+      return true;
+    } catch (error) {
+      console.error('❌ Failed to connect to Cosmos DB:', error.message);
+      throw error;
+    }
+  }s;
 
-  } catch (error) {
-    console.error('❌ Failed to connect to Cosmos DB:', error.message);
-    throw error;
+  async initializeContainers() {
+    const containerDefinitions = [
+      { id: 'users', partitionKey: '/id' },
+      { id: 'images', partitionKey: '/creatorId' },
+      { id: 'comments', partitionKey: '/imageId' },
+      { id: 'ratings', partitionKey: '/imageId' },
+      { id: 'notifications', partitionKey: '/recipientId' }
+    ];
+
+    for (const containerDef of containerDefinitions) {
+      const { container } = await this.database.containers.createIfNotExists({
+        id: containerDef.id,
+        partitionKey: {
+          paths: [containerDef.partitionKey]
+        }
+      });
+
+      this.containers[containerDef.id] = container;
+    }
   }
-}s
-
-async initializeContainers() {
-  const containerDefinitions = [
-    { id: 'users', partitionKey: '/id' },
-    { id: 'images', partitionKey: '/creatorId' },
-    { id: 'comments', partitionKey: '/imageId' },
-    { id: 'ratings', partitionKey: '/imageId' },
-    { id: 'notifications', partitionKey: '/recipientId' }
-  ];
-
-  for (const containerDef of containerDefinitions) {
-
-    const { container } = await this.database.containers.createIfNotExists({
-      id: containerDef.id,
-      partitionKey: {
-        paths: [containerDef.partitionKey]
-      }
-    });
-
-    this.containers[containerDef.id] = container;
-  }
-}
 
   getContainer(containerName) {
     if (!this.containers[containerName]) {

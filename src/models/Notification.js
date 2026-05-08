@@ -35,8 +35,8 @@ class Notification {
 
   static async findByRecipientId(recipientId, options = {}) {
     let querySpec = {
-      query: "SELECT * FROM c WHERE c.recipientId = @recipientId AND c.type = 'notification' ORDER BY c.createdAt DESC",
-      parameters: [{ name: "@recipientId", value: recipientId }]
+      query: 'SELECT * FROM c WHERE c.recipientId = @recipientId AND c.type = \'notification\' ORDER BY c.createdAt DESC',
+      parameters: [{ name: '@recipientId', value: recipientId }]
     };
 
     if (options.limit) {
@@ -49,8 +49,8 @@ class Notification {
 
   static async findUnreadByRecipientId(recipientId, options = {}) {
     let querySpec = {
-      query: "SELECT * FROM c WHERE c.recipientId = @recipientId AND c.read = false AND c.type = 'notification' ORDER BY c.createdAt DESC",
-      parameters: [{ name: "@recipientId", value: recipientId }]
+      query: 'SELECT * FROM c WHERE c.recipientId = @recipientId AND c.read = false AND c.type = \'notification\' ORDER BY c.createdAt DESC',
+      parameters: [{ name: '@recipientId', value: recipientId }]
     };
 
     if (options.limit) {

@@ -74,7 +74,7 @@ class User {
   async save() {
     await this.hashPassword();
     this.updatedAt = new Date().toISOString();
-    
+
     const result = await cosmosDB.createItem('users', this);
     return new User(result);
   }
@@ -83,9 +83,9 @@ class User {
   async update(updateData) {
     Object.assign(this, updateData);
     this.updatedAt = new Date().toISOString();
-    
+
     await this.hashPassword();
-    
+
     const result = await cosmosDB.updateItem('users', this.id, this.id, this);
     return new User(result);
   }
@@ -97,15 +97,15 @@ class User {
   }
 
   static async findByEmail(email) {
-    const user = await cosmosDB.findItem('users', "c.email = @email", {
-      parameters: [{ name: "@email", value: email.toLowerCase() }]
+    const user = await cosmosDB.findItem('users', 'c.email = @email', {
+      parameters: [{ name: '@email', value: email.toLowerCase() }]
     });
     return user ? new User(user) : null;
   }
 
   static async findByUsername(username) {
-    const user = await cosmosDB.findItem('users', "c.username = @username", {
-      parameters: [{ name: "@username", value: username }]
+    const user = await cosmosDB.findItem('users', 'c.username = @username', {
+      parameters: [{ name: '@username', value: username }]
     });
     return user ? new User(user) : null;
   }
@@ -121,13 +121,13 @@ class User {
 
   static async findMany(filter = {}, options = {}) {
     let querySpec = {
-      query: "SELECT * FROM c WHERE c.type = 'user'"
+      query: 'SELECT * FROM c WHERE c.type = \'user\''
     };
 
     // Add filters if provided
     if (filter.role) {
-      querySpec.query += " AND c.role = @role";
-      querySpec.parameters = [{ name: "@role", value: filter.role }];
+      querySpec.query += ' AND c.role = @role';
+      querySpec.parameters = [{ name: '@role', value: filter.role }];
     }
 
     if (options.limit) {

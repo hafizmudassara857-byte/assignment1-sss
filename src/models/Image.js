@@ -87,7 +87,7 @@ class Image {
   // Save image to Cosmos DB
   async save() {
     this.updatedAt = new Date().toISOString();
-    
+
     const result = await cosmosDB.createItem('images', this);
     return new Image(result);
   }
@@ -96,7 +96,7 @@ class Image {
   async update(updateData) {
     Object.assign(this, updateData);
     this.updatedAt = new Date().toISOString();
-    
+
     const result = await cosmosDB.updateItem('images', this.id, this.creatorId, this);
     return new Image(result);
   }
@@ -109,14 +109,14 @@ class Image {
 
   static async findByCreatorId(creatorId, options = {}) {
     let querySpec = {
-      query: "SELECT * FROM c WHERE c.creatorId = @creatorId AND c.type = 'image'",
-      parameters: [{ name: "@creatorId", value: creatorId }]
+      query: 'SELECT * FROM c WHERE c.creatorId = @creatorId AND c.type = \'image\'',
+      parameters: [{ name: '@creatorId', value: creatorId }]
     };
 
     if (options.limit) {
       querySpec.query += ` ORDER BY c.createdAt DESC OFFSET 0 LIMIT ${options.limit}`;
     } else {
-      querySpec.query += " ORDER BY c.createdAt DESC";
+      querySpec.query += ' ORDER BY c.createdAt DESC';
     }
 
     const images = await cosmosDB.queryItems('images', querySpec);
@@ -125,14 +125,14 @@ class Image {
 
   static async search(searchTerm, options = {}) {
     let querySpec = {
-      query: "SELECT * FROM c WHERE c.type = 'image' AND (CONTAINS(c.title, @searchTerm) OR CONTAINS(c.caption, @searchTerm))",
-      parameters: [{ name: "@searchTerm", value: searchTerm }]
+      query: 'SELECT * FROM c WHERE c.type = \'image\' AND (CONTAINS(c.title, @searchTerm) OR CONTAINS(c.caption, @searchTerm))',
+      parameters: [{ name: '@searchTerm', value: searchTerm }]
     };
 
     if (options.limit) {
       querySpec.query += ` ORDER BY c.createdAt DESC OFFSET 0 LIMIT ${options.limit}`;
     } else {
-      querySpec.query += " ORDER BY c.createdAt DESC";
+      querySpec.query += ' ORDER BY c.createdAt DESC';
     }
 
     const images = await cosmosDB.queryItems('images', querySpec);
@@ -141,7 +141,7 @@ class Image {
 
   static async findRecent(options = {}) {
     let querySpec = {
-      query: "SELECT * FROM c WHERE c.type = 'image' ORDER BY c.createdAt DESC"
+      query: 'SELECT * FROM c WHERE c.type = \'image\' ORDER BY c.createdAt DESC'
     };
 
     if (options.limit) {
