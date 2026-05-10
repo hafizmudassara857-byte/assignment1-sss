@@ -64,6 +64,18 @@ class User {
     return user ? new User(user) : null;
   }
 
+  static async findByIds(userIds) {
+    if (!userIds || userIds.length === 0) {return [];}
+
+    const querySpec = {
+      query: 'SELECT * FROM c WHERE ARRAY_CONTAINS(@ids, c.id) AND c.type = \'user\'',
+      parameters: [{ name: '@ids', value: userIds }]
+    };
+
+    const users = await cosmosDB.queryItems('users', querySpec);
+    return users.map(user => new User(user));
+  }
+
   static async findByEmail(email) {
     const user = await cosmosDB.findItem('users', 'c.email = @email', {
       parameters: [{ name: '@email', value: email.toLowerCase() }]

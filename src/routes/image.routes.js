@@ -19,6 +19,7 @@ router.get(
     query('page').optional().isInt({ min: 1 }).withMessage('Page must be a positive integer'),
     query('limit').optional().isInt({ min: 1, max: 50 }).withMessage('Limit must be between 1 and 50'),
     query('creatorId').optional().trim().notEmpty().withMessage('Creator id must be valid'),
+    query('creatorid').optional().trim().notEmpty().withMessage('Creator id must be valid'),
     validate
   ],
   listImages

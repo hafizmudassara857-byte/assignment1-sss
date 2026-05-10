@@ -1,4 +1,5 @@
 const Image = require('../models/Image');
+const User = require('../models/User');
 const Comment = require('../models/Comment');
 const Rating = require('../models/Rating');
 const Notification = require('../models/Notification');
@@ -19,6 +20,26 @@ function normalizePeople(people) {
     .split(',')
     .map((name) => name.trim())
     .filter(Boolean);
+}
+
+
+async function populateCreators(images) {
+  if (!images || images.length === 0) {return [];}
+
+  const creatorIds = [...new Set(images.map((img) => img.creatorId))];
+  const users = await User.findByIds(creatorIds);
+  const userMap = users.reduce((map, user) => {
+    map[user.id] = user.toPublicJSON();
+    return map;
+  }, {});
+
+  return images.map((img) => {
+    const imageJson = img.toJSON ? img.toJSON() : img;
+    return {
+      ...imageJson,
+      creator: userMap[img.creatorId] || { id: img.creatorId, username: 'Unknown' }
+    };
+  });
 }
 
 
@@ -45,7 +66,10 @@ async function upload(req, res, next) {
 
     return res.status(201).json({
       message: 'Image uploaded successfully',
-      image
+      image: {
+        ...image.toJSON(),
+        creator: req.user.toPublicJSON()
+      }
     });
   } catch (error) {
     return next(error);
@@ -56,7 +80,7 @@ async function upload(req, res, next) {
 async function listImages(req, res, next) {
   try {
     const { page, limit } = req.query;
-    const { creatorId } = req.query;
+    const creatorId = req.query.creatorId || req.query.creatorid;
     const pagination = buildPagination(page, limit);
 
     const cacheKey = `images:${pagination.page}:${pagination.limit}:${creatorId || 'all'}`;
@@ -88,7 +112,7 @@ async function listImages(req, res, next) {
       limit: pagination.limit,
       total,
       totalPages: Math.ceil(total / pagination.limit),
-      data: images
+      data: await populateCreators(images)
     };
 
     await setCachedValue(cacheKey, payload, 90);
@@ -110,13 +134,15 @@ async function getImageById(req, res, next) {
       return res.status(404).json({ message: 'Image not found' });
     }
 
-    const [comments, ratings] = await Promise.all([
+    const [comments, ratings, creator] = await Promise.all([
       Comment.findByImageId(id, { limit: 20 }),
-      Rating.findByImageId(id)
+      Rating.findByImageId(id),
+      User.findById(image.creatorId)
     ]);
 
     return res.status(200).json({
       ...image.toJSON(),
+      creator: creator ? creator.toPublicJSON() : { id: image.creatorId, username: 'Unknown' },
       comments,
       ratings
     });
@@ -242,7 +268,7 @@ async function searchImages(req, res, next) {
     const payload = {
       query: searchQuery,
       count: images.length,
-      data: images
+      data: await populateCreators(images)
     };
 
     await setCachedValue(cacheKey, payload, 120);
