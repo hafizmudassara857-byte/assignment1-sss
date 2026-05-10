@@ -29,7 +29,7 @@ class CosmosDBService {
       console.error('❌ Failed to connect to Cosmos DB:', error.message);
       throw error;
     }
-  }s;
+  }
 
   async initializeContainers() {
     const containerDefinitions = [

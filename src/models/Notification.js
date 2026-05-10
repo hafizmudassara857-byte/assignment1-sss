@@ -6,13 +6,13 @@ class Notification {
     this.id = notificationData.id || uuidv4();
     this.recipientId = notificationData.recipientId;
     this.senderId = notificationData.senderId;
-    this.type = notificationData.type;
+    this.notificationType = notificationData.notificationType || notificationData.type; // support both during transition
     this.message = notificationData.message;
     this.relatedImageId = notificationData.relatedImageId;
     this.read = notificationData.read || false;
     this.createdAt = notificationData.createdAt || new Date().toISOString();
     this.updatedAt = notificationData.updatedAt || new Date().toISOString();
-    this.type = 'notification';
+    this.type = 'notification'; // For Cosmos DB type discrimination
   }
 
   async save() {
@@ -82,7 +82,7 @@ class Notification {
     return Notification.create({
       recipientId: imageOwnerId,
       senderId: likerId,
-      type: 'like',
+      notificationType: 'like',
       message: 'Someone liked your photo',
       relatedImageId: imageId
     });
@@ -96,24 +96,17 @@ class Notification {
     return Notification.create({
       recipientId: imageOwnerId,
       senderId: commenterId,
-      type: 'comment',
+      notificationType: 'comment',
       message: `Someone commented: "${commentText.substring(0, 50)}${commentText.length > 50 ? '...' : ''}"`,
       relatedImageId: imageId
     });
   }
 
   static async markAllAsReadForUser(recipientId) {
-    const unreadNotifications = await Notification.find({ recipientId, read: false });
+    const unreadNotifications = await Notification.findUnreadByRecipientId(recipientId);
     const updatePromises = unreadNotifications.map(notification => notification.update({ read: true }));
     await Promise.all(updatePromises);
     return unreadNotifications.length;
-  }
-
-  async update(updateData) {
-    Object.assign(this, updateData);
-    this.updatedAt = new Date().toISOString();
-    const result = await cosmosDB.updateItem('notifications', this.id, this.recipientId, this);
-    return new Notification(result);
   }
 
   validate() {
@@ -127,8 +120,8 @@ class Notification {
       errors.push('Sender ID is required');
     }
 
-    if (!this.type || !['like', 'comment'].includes(this.type)) {
-      errors.push('Type must be either like or comment');
+    if (!this.notificationType || !['like', 'comment'].includes(this.notificationType)) {
+      errors.push('Notification type must be either like or comment');
     }
 
     if (!this.message || this.message.trim().length === 0) {
