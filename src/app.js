@@ -16,7 +16,6 @@ const env = require('./config/env');
 
 const app = express();
 
-// Trust proxy for Azure App Services
 app.set('trust proxy', true);
 
 app.use(helmet());
